@@ -1,0 +1,13 @@
+html,body {
+  width: 100%;
+  min-height: 100%;
+  background-color: black; !important  /* bootstrap forces white background */
+  overflow: hidden;
+  margin: 0 0;
+  padding: 0 0;
+}
+
+#cnvs {
+  width: 100%;
+  height: 100%;
+}
