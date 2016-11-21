@@ -271,7 +271,7 @@
       }
       distance.x = mouse.x - win.mid.x
       distance.y = mouse.y - win.mid.y
-      var oldrads = +me[0].rotation.toFixed(2)
+      var oldrads = me[0].rotation == undefined ? 0 : +me[0].rotation.toFixed(2)
       var newrads = Math.atan2(distance.y, distance.x)
       var direction = undefined
 
@@ -333,7 +333,7 @@
          curRads: oldrads,
          newRads: newrads,
          direction: direction,
-         speed: speed,
+         speed: overdrive,
          coords: coords
       }
 

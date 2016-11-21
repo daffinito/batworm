@@ -3,19 +3,24 @@ var totalPlayers = 0
 var curNumPlayers = 0
 
 module.exports = {
-   addPlayer: function(player, num) {
+   addPlayer: function(player, nr, num) {
       players[num] = {
          coords: player,
-         playerNum: num
+         playerNum: num,
+         newRads: nr,
+         speed: 1
       }
       totalPlayers += 1
       curNumPlayers += 1
    },
    updatePlayer: function(player, num) {
-      players[num] = {
-         coords: player,
-         playerNum: num
-      }
+      players[num].coords =  player
+      players.playerNum = num
+
+   },
+   updatePlayerRads: function(nr, speed, num) {
+      players[num].newRads = nr
+      players[num].speed = speed
    },
    getPlayers: function() {
       var retval = []

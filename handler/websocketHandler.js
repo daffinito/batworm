@@ -1,8 +1,10 @@
 var p = require('./players')
 var WebSocketServer = require('ws').Server
 var wss = new WebSocketServer({ port: 8080 })
+var baseSpeed = 3
 
-setInterval(sendData,10)
+setInterval(sendData,20)
+setInterval(calculateAll,20)
 
 wss.on('connection', function (ws) {
    var ttlPlayers = p.getTtlNumPlayers()
@@ -12,23 +14,23 @@ wss.on('connection', function (ws) {
       dataType: "initcon",
       playerNum: playerNum,
       coords: [],
-      size: 100
+      size: 100,
+      newRads: 0
    }
 
    for (var i = 0; i < resp.size + 1; i++) {
       resp.coords[i] = {x: 600, y: 100, rotation: 0, vx: 0, vy: 0}
    }
 
-   p.addPlayer(resp.coords, resp.playerNum)
+   p.addPlayer(resp.coords, resp.newRads, resp.playerNum)
    ws.send(JSON.stringify(resp))
 
    ws.on('message', function (data) {
       data = JSON.parse(data)
       if (data.dataType === 'movement') {
-         var result = calculate(data)
-         p.updatePlayer(result.coords,playerNum)
-         result.players = p.getOtherPlayers(playerNum)
-    //     ws.send(JSON.stringify(result))
+         // var result = calculate(data)
+         p.updatePlayerRads(data.newRads,data.speed, playerNum)
+         // result.players = p.getOtherPlayers(playerNum)
       }
    })
 
@@ -59,8 +61,9 @@ function sendData() {
 
 function calculate(data) {
       var resp = data
-      resp.coords[0].vx = Math.cos(data.newRads) * data.speed
-      resp.coords[0].vy = Math.sin(data.newRads) * data.speed
+      var speed = baseSpeed * data.speed
+      resp.coords[0].vx = Math.cos(data.newRads) * speed
+      resp.coords[0].vy = Math.sin(data.newRads) * speed
 
       var distance = {
          total: 0,
@@ -77,15 +80,22 @@ function calculate(data) {
          distance.y = resp.coords[i - 1].y - resp.coords[i].y
          distance.total = Math.hypot(resp.coords[i - 1].x - resp.coords[i].x, resp.coords[i - 1].y - resp.coords[i].y)
 
-         if (distance.total > 5 + data.speed) {
+         if (distance.total > 5 + speed) {
             resp.coords[i].rotation = Math.atan2(distance.y, distance.x)
-            resp.coords[i].vx = Math.cos(resp.coords[i].rotation) * data.speed
-            resp.coords[i].vy = Math.sin(resp.coords[i].rotation) * data.speed
+            resp.coords[i].vx = Math.cos(resp.coords[i].rotation) * speed
+            resp.coords[i].vy = Math.sin(resp.coords[i].rotation) * speed
 
             resp.coords[i].x += resp.coords[i].vx
             resp.coords[i].y += resp.coords[i].vy
          }
-
       }
       return resp
+}
+
+function calculateAll() {
+   var allData = p.getPlayers()
+   for (var i = 0; i< allData.length; i++) {
+      var result = calculate(allData[i])
+      p.updatePlayer(result.coords,allData[i].playerNum)
+   }
 }
