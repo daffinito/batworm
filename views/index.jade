@@ -4,7 +4,13 @@ html
     != newrelic.getBrowserTimingHeader()
     title= title
     link(rel='stylesheet', href='/stylesheets/style.css')
-  body(ng-controller="mainController")
+    script#shader(type="shader")
+      | precision mediump float;
+      | varying vec2 vTextureCoord;
+      | uniform sampler2D uSampler;
+      | void main(void) {
+      |   gl_FragColor = texture2D(uSampler, vTextureCoord);
+      | }
+  body
   script(src='https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.0.0/pixi.min.js')
   script(src='/js/bundle.js')
-

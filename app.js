@@ -1,4 +1,5 @@
 var newrelic = require('newrelic');
+var webskt = require('./handler/websocketHandler')
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
