@@ -1,65 +1,67 @@
-var p = require('./players')
-var WebSocketServer = require('ws').Server
-var wss = new WebSocketServer({ port: 8080 })
-var baseSpeed = 3
 
-setInterval(sendData,20)
-setInterval(calculateAll,20)
+module.exports = function (server) {
+   var p = require('./players')
+   var WebSocketServer = require('ws').Server
+   var wss = new WebSocketServer({ server })
+   var baseSpeed = 3
 
-wss.on('connection', function (ws) {
-   var ttlPlayers = p.getTtlNumPlayers()
-   var playerNum = ttlPlayers + 1
+   setInterval(sendData, 20)
+   setInterval(calculateAll, 20)
 
-   var resp = {
-      dataType: "initcon",
-      playerNum: playerNum,
-      coords: [],
-      size: 100,
-      newRads: 0
-   }
+   wss.on('connection', function (ws) {
+      var ttlPlayers = p.getTtlNumPlayers()
+      var playerNum = ttlPlayers + 1
 
-   for (var i = 0; i < resp.size + 1; i++) {
-      resp.coords[i] = {x: 600, y: 100, rotation: 0, vx: 0, vy: 0}
-   }
-
-   p.addPlayer(resp.coords, resp.newRads, resp.playerNum)
-   ws.send(JSON.stringify(resp))
-
-   ws.on('message', function (data) {
-      data = JSON.parse(data)
-      if (data.dataType === 'movement') {
-         // var result = calculate(data)
-         p.updatePlayerRads(data.newRads,data.speed, playerNum)
-         // result.players = p.getOtherPlayers(playerNum)
+      var resp = {
+         dataType: "initcon",
+         playerNum: playerNum,
+         coords: [],
+         size: 100,
+         newRads: 0
       }
-   })
 
-   ws.on('close', function (code, message) {
-      p.rmPlayer(playerNum)
-   })
+      for (var i = 0; i < resp.size + 1; i++) {
+         resp.coords[i] = { x: 600, y: 100, rotation: 0, vx: 0, vy: 0 }
+      }
 
-   ws.on('error', function (error) {
-      p.rmPlayer(playerNum)
-   })
-})
+      p.addPlayer(resp.coords, resp.newRads, resp.playerNum)
+      ws.send(JSON.stringify(resp))
 
-function sendData() {
-   if (p.getTtlNumPlayers() > 0) {
-      var data = {}
-      data.all = p.getPlayers()
-      data.dataType = "movement"
-      wss.clients.forEach(function each(client) {
-         try {
-            client.send(JSON.stringify(data))
-         }
-         catch (e) {
-            console.log(e)
+      ws.on('message', function (data) {
+         data = JSON.parse(data)
+         if (data.dataType === 'movement') {
+            // var result = calculate(data)
+            p.updatePlayerRads(data.newRads, data.speed, playerNum)
+            // result.players = p.getOtherPlayers(playerNum)
          }
       })
-   }
-}
 
-function calculate(data) {
+      ws.on('close', function (code, message) {
+         p.rmPlayer(playerNum)
+      })
+
+      ws.on('error', function (error) {
+         p.rmPlayer(playerNum)
+      })
+   })
+
+   function sendData () {
+      if (p.getTtlNumPlayers() > 0) {
+         var data = {}
+         data.all = p.getPlayers()
+         data.dataType = "movement"
+         wss.clients.forEach(function each (client) {
+            try {
+               client.send(JSON.stringify(data))
+            }
+            catch (e) {
+               console.log(e)
+            }
+         })
+      }
+   }
+
+   function calculate (data) {
       var resp = data
       var speed = baseSpeed * data.speed
       resp.coords[0].vx = Math.cos(data.newRads) * speed
@@ -90,12 +92,13 @@ function calculate(data) {
          }
       }
       return resp
-}
+   }
 
-function calculateAll() {
-   var allData = p.getPlayers()
-   for (var i = 0; i< allData.length; i++) {
-      var result = calculate(allData[i])
-      p.updatePlayer(result.coords,allData[i].playerNum)
+   function calculateAll () {
+      var allData = p.getPlayers()
+      for (var i = 0; i < allData.length; i++) {
+         var result = calculate(allData[i])
+         p.updatePlayer(result.coords, allData[i].playerNum)
+      }
    }
 }

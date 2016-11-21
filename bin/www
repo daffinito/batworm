@@ -26,6 +26,9 @@ var server = http.createServer(app);
  */
 
 server.listen(port);
+
+var wbsk = require('../handler/websocketHandler')(server)
+
 server.on('error', onError);
 server.on('listening', onListening);
 

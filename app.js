@@ -1,5 +1,5 @@
 var newrelic = require('newrelic');
-var webskt = require('./handler/websocketHandler')
+//var webskt = require('./handler/websocketHandler')
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
@@ -62,6 +62,5 @@ app.use(function(err, req, res, next) {
     error: {}
   });
 });
-
 
 module.exports = app;

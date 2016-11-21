@@ -34,8 +34,11 @@
    var wsOpen = false
    var playerNum = 0
 
-   var host = window.document.location.host.replace(/:.*/, '')
-   var ws = new WebSocket('ws://' + host + ':8080')
+   var HOST = location.origin.replace(/^http/, 'ws')
+   var ws = new WebSocket(HOST);
+
+ //  var host = location.origin.replace(/:.*/, '')
+ //  var ws = new WebSocket('ws://' + host + ':8080')
 
    ws.onmessage = function (event) {
       checkMsg(event.data)
